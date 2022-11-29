@@ -23,7 +23,7 @@ public:
     }
 
     // Конструктор из сырого указателя, хранящего адрес массива в куче либо nullptr
-    explicit ArrayPtr(Type* raw_ptr, size_t size) noexcept :
+    explicit ArrayPtr(Type* raw_ptr, size_t size) noexcept:
         raw_ptr_(raw_ptr),
         size_(size)
     {
@@ -37,21 +37,17 @@ public:
     ArrayPtr& operator=(const ArrayPtr&) = delete;
 
     //Разрешаем перемещение
-    ArrayPtr(ArrayPtr &&other)
+    ArrayPtr(ArrayPtr &&other) noexcept
     {
         assert(size_ == 0 && raw_ptr_ == nullptr);
-        ArrayPtr tmp(other.size_);
-        tmp.swap(other);
-        swap(tmp);
-        other.Clear();
+        swap(other);
     }
 
-    ArrayPtr& operator=(ArrayPtr &&rhs)
+    ArrayPtr& operator=(ArrayPtr &&rhs) noexcept
     {
         if (this != &rhs)
         {
-            ArrayPtr tmp(rhs);
-            swap(tmp);
+            swap(rhs);
         }
         return *this;
     }

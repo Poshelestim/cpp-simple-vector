@@ -52,14 +52,14 @@ public:
     // Создаёт вектор из size элементов, инициализированных значением value
     SimpleVector(size_t size, const Type &value);
 
-    SimpleVector(size_t size, Type &&value);
+    SimpleVector(size_t size, Type &&value) noexcept;
 
     // Создаёт вектор из std::initializer_list
     SimpleVector(std::initializer_list<Type> init);
 
     SimpleVector(const SimpleVector &other);
 
-    SimpleVector(SimpleVector &&other);
+    SimpleVector(SimpleVector &&other) noexcept;
 
     SimpleVector(const ReserveProxyObj &capacity_to_reverse);
 
@@ -85,7 +85,7 @@ public:
     // вместимость вектора должна увеличиться вдвое, а для вектора вместимостью 0 стать равной 1
     Iterator Insert(ConstIterator pos, const Type &value);
 
-    Iterator Insert(ConstIterator pos, Type &&value);
+    Iterator Insert(ConstIterator pos, Type &&value) noexcept;
 
     // "Удаляет" последний элемент вектора. Вектор не должен быть пустым
     void PopBack() noexcept;
@@ -178,7 +178,7 @@ SimpleVector<Type>::SimpleVector(size_t size, const Type &value)
 }
 
 template<typename Type>
-SimpleVector<Type>::SimpleVector(size_t size, Type &&value)
+SimpleVector<Type>::SimpleVector(size_t size, Type &&value) noexcept
 {
     assert(size_ == 0 && capacity_ == 0);
 
@@ -217,7 +217,7 @@ SimpleVector<Type>::SimpleVector(const SimpleVector &other)
 }
 
 template<typename Type>
-SimpleVector<Type>::SimpleVector(SimpleVector &&other)
+SimpleVector<Type>::SimpleVector(SimpleVector &&other) noexcept
 {
     assert(size_ == 0 && capacity_ == 0);
 
@@ -308,12 +308,12 @@ SimpleVector<Type>::Insert(ConstIterator pos, const Type &value)
 
 template<typename Type>
 typename SimpleVector<Type>::Iterator
-SimpleVector<Type>::Insert(ConstIterator pos, Type &&value)
+SimpleVector<Type>::Insert(ConstIterator pos, Type &&value) noexcept
 {
-    if (pos < begin() || pos > end())
-    {
-        throw std::out_of_range("out of range");
-    }
+//    if (pos < begin() || pos > end())
+//    {
+//        throw std::out_of_range("out of range");
+//    }
 
     int distance = std::distance(cbegin(), pos);
 
