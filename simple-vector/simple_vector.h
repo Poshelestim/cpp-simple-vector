@@ -115,7 +115,8 @@ public:
     void Clear() noexcept;
 
     // Изменяет размер массива.
-    // При увеличении размера новые элементы получают значение по умолчанию для типа Type
+    // При увеличении размера новые элементы получают значение по умолчанию
+    // для типа Type
     void Resize(size_t new_size);
 
     // Задает ёмкость вектора
@@ -288,7 +289,11 @@ template<typename Type>
 typename SimpleVector<Type>::Iterator
 SimpleVector<Type>::Insert(ConstIterator pos, const Type &value)
 {
-    assert(pos >= begin() && pos <= end());
+    if (pos < begin() || pos > end())
+    {
+        throw std::out_of_range("out of range");
+    }
+
     int distance = pos - begin();
 
     if (size_ == capacity_)
@@ -305,7 +310,11 @@ template<typename Type>
 typename SimpleVector<Type>::Iterator
 SimpleVector<Type>::Insert(ConstIterator pos, Type &&value)
 {
-    assert(pos >= begin() && pos <= end());
+    if (pos < begin() || pos > end())
+    {
+        throw std::out_of_range("out of range");
+    }
+
     int distance = std::distance(cbegin(), pos);
 
     if (size_ == capacity_)
@@ -332,14 +341,12 @@ template<typename Type>
 typename SimpleVector<Type>::Iterator
 SimpleVector<Type>::Erase(ConstIterator pos)
 {
-    assert(pos >= begin() && pos <= end());
-    int distance = std::distance(cbegin(), pos);
+    if (pos < begin() || pos >= end())
+    {
+        throw std::out_of_range("out of range");
+    }
 
-    //    SimpleVector<Type> tmp(*this);
-    //    std::copy_backward(std::make_move_iterator(tmp.begin() + distance + 1),
-    //                       std::make_move_iterator(tmp.end()), tmp.end() - 1);
-    //    --tmp.size_;
-    //    swap(tmp);
+    int distance = std::distance(cbegin(), pos);
 
     std::move(begin() + distance + 1, end(), begin() + distance);
     --size_;

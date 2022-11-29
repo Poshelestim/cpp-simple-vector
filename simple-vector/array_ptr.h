@@ -1,15 +1,18 @@
 #include <cassert>
 #include <cstdlib>
+#include <utility>
 
 template <typename Type>
-class ArrayPtr {
+class ArrayPtr
+{
 public:
     // Инициализирует ArrayPtr нулевым указателем
     ArrayPtr() = default;
 
     // Создаёт в куче массив из size элементов типа Type.
     // Если size == 0, поле raw_ptr_ должно быть равно nullptr
-    explicit ArrayPtr(size_t size)
+    explicit ArrayPtr(size_t size) :
+        size_(size)
     {
         if (size == 0)
         {
@@ -20,9 +23,11 @@ public:
     }
 
     // Конструктор из сырого указателя, хранящего адрес массива в куче либо nullptr
-    explicit ArrayPtr(Type* raw_ptr) noexcept
+    explicit ArrayPtr(Type* raw_ptr, size_t size) noexcept :
+        raw_ptr_(raw_ptr),
+        size_(size)
     {
-        raw_ptr_ = raw_ptr;
+
     }
 
     // Запрещаем копирование
@@ -32,8 +37,24 @@ public:
     ArrayPtr& operator=(const ArrayPtr&) = delete;
 
     //Разрешаем перемещение
-    ArrayPtr(ArrayPtr&&) = default;
-    ArrayPtr& operator=(ArrayPtr&&) = default;
+    ArrayPtr(ArrayPtr &&other)
+    {
+        assert(size_ == 0 && raw_ptr_ == nullptr);
+        ArrayPtr tmp(other.size_);
+        tmp.swap(other);
+        swap(tmp);
+        other.Clear();
+    }
+
+    ArrayPtr& operator=(ArrayPtr &&rhs)
+    {
+        if (this != &rhs)
+        {
+            ArrayPtr tmp(rhs);
+            swap(tmp);
+        }
+        return *this;
+    }
 
     ~ArrayPtr()
     {
@@ -46,18 +67,21 @@ public:
     {
         Type *ptr_to_return = this->raw_ptr_;
         this->raw_ptr_ = nullptr;
+        this->size_ = 0;
         return ptr_to_return;
     }
 
     // Возвращает ссылку на элемент массива с индексом index
     Type& operator[](size_t index) noexcept
     {
+        assert(index < size_);
         return raw_ptr_[index];
     }
 
     // Возвращает константную ссылку на элемент массива с индексом index
     const Type& operator[](size_t index) const noexcept
     {
+        assert(index < size_);
         return raw_ptr_[index];
     }
 
@@ -76,16 +100,18 @@ public:
     // Обменивается значениям указателя на массив с объектом other
     void swap(ArrayPtr& other) noexcept
     {
-        Type* ptr_copy = other.raw_ptr_;
-        other.raw_ptr_ = this->raw_ptr_;
-        this->raw_ptr_ = ptr_copy;
+        std::swap(this->raw_ptr_, other.raw_ptr_);
+        std::swap(this->size_, other.size_);
     }
 
     void Clear()
     {
         delete[] raw_ptr_;
+        raw_ptr_ = nullptr;
+        size_ = 0;
     }
 
 private:
     Type* raw_ptr_ = nullptr;
+    size_t size_ = 0;
 };
